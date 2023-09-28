@@ -58,6 +58,29 @@ exports.checkAllowList = checkAllowList;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -70,6 +93,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const octokit_1 = __nccwpck_require__(3258);
 const github_1 = __nccwpck_require__(5438);
+const input = __importStar(__nccwpck_require__(3611));
 function getCommitters() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -115,7 +139,7 @@ function getCommitters() {
     }`.replace(/ /g, ''), {
                 owner: github_1.context.repo.owner,
                 name: github_1.context.repo.repo,
-                number: github_1.context.issue.number,
+                number: input.getPrNumber(github_1.context.issue.number),
                 cursor: ''
             });
             response.repository.pullRequest.commits.edges.forEach(edge => {
@@ -123,7 +147,7 @@ function getCommitters() {
                 let user = {
                     name: committer.login || committer.name,
                     id: committer.databaseId || '',
-                    pullRequestNo: github_1.context.issue.number
+                    pullRequestNo: input.getPrNumber(github_1.context.issue.number)
                 };
                 if (committers.length === 0 || committers.map((c) => {
                     return c.name;
@@ -345,7 +369,7 @@ exports.createFile = createFile;
 function updateFile(sha, claFileContent, reactedCommitters) {
     return __awaiter(this, void 0, void 0, function* () {
         const octokitInstance = isRemoteRepoOrOrgConfigured() ? (0, octokit_1.getPATOctokit)() : (0, octokit_1.getDefaultOctokitClient)();
-        const pullRequestNo = github_1.context.issue.number;
+        const pullRequestNo = input.getPrNumber(github_1.context.issue.number);
         const owner = github_1.context.issue.owner;
         const repo = github_1.context.issue.repo;
         claFileContent === null || claFileContent === void 0 ? void 0 : claFileContent.signedContributors.push(...reactedCommitters.newSigned);
@@ -424,6 +448,7 @@ exports.reRunLastWorkFlowIfRequired = void 0;
 const github_1 = __nccwpck_require__(5438);
 const octokit_1 = __nccwpck_require__(3258);
 const core = __importStar(__nccwpck_require__(2186));
+const input = __importStar(__nccwpck_require__(3611));
 // Note: why this  re-run of the last failed CLA workflow status check is explained this issue https://github.com/cla-assistant/github-action/issues/39
 function reRunLastWorkFlowIfRequired() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -450,7 +475,7 @@ function getBranchOfPullRequest() {
         const pullRequest = yield octokit_1.octokit.pulls.get({
             owner: github_1.context.repo.owner,
             repo: github_1.context.repo.repo,
-            pull_number: github_1.context.issue.number
+            pull_number: input.getPrNumber(github_1.context.issue.number)
         });
         return pullRequest.data.head.ref;
     });
@@ -570,7 +595,7 @@ function createComment(signed, committerMap) {
         yield octokit_1.octokit.issues.createComment({
             owner: github_1.context.repo.owner,
             repo: github_1.context.repo.repo,
-            issue_number: github_1.context.issue.number,
+            issue_number: (0, getInputs_1.getPrNumber)(github_1.context.issue.number),
             body: (0, pullRequestCommentContent_1.commentContent)(signed, committerMap)
         }).catch(error => { throw new Error(`Error occured when creating a pull request comment: ${error.message}`); });
     });
@@ -588,7 +613,7 @@ function updateComment(signed, committerMap, claBotComment) {
 function getComment() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const response = yield octokit_1.octokit.issues.listComments({ owner: github_1.context.repo.owner, repo: github_1.context.repo.repo, issue_number: github_1.context.issue.number });
+            const response = yield octokit_1.octokit.issues.listComments({ owner: github_1.context.repo.owner, repo: github_1.context.repo.repo, issue_number: (0, getInputs_1.getPrNumber)(github_1.context.issue.number) });
             //TODO: check the below regex
             // using a `string` true or false purposely as github action input cannot have a boolean value
             if ((0, getInputs_1.getUseDcoFlag)() === 'true') {
@@ -781,10 +806,11 @@ exports.lockPullRequest = void 0;
 const octokit_1 = __nccwpck_require__(3258);
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(5438);
+const input = __importStar(__nccwpck_require__(3611));
 function lockPullRequest() {
     return __awaiter(this, void 0, void 0, function* () {
         core.info('Locking the Pull Request to safe guard the Pull Request CLA Signatures');
-        const pullRequestNo = github_1.context.issue.number;
+        const pullRequestNo = input.getPrNumber(github_1.context.issue.number);
         try {
             yield octokit_1.octokit.issues.lock({
                 owner: github_1.context.repo.owner,
@@ -808,6 +834,29 @@ exports.lockPullRequest = lockPullRequest;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -821,13 +870,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const octokit_1 = __nccwpck_require__(3258);
 const github_1 = __nccwpck_require__(5438);
 const getInputs_1 = __nccwpck_require__(3611);
+const input = __importStar(__nccwpck_require__(3611));
 function signatureWithPRComment(committerMap, committers) {
     return __awaiter(this, void 0, void 0, function* () {
         let repoId = github_1.context.payload.repository.id;
         let prResponse = yield octokit_1.octokit.issues.listComments({
             owner: github_1.context.repo.owner,
             repo: github_1.context.repo.repo,
-            issue_number: github_1.context.issue.number
+            issue_number: input.getPrNumber(github_1.context.issue.number)
         });
         let listOfPRComments = [];
         let filteredListOfPRComments = [];
@@ -839,7 +889,7 @@ function signatureWithPRComment(committerMap, committers) {
                 body: prComment.body.trim().toLowerCase(),
                 created_at: prComment.created_at,
                 repoId: repoId,
-                pullRequestNo: github_1.context.issue.number
+                pullRequestNo: input.getPrNumber(github_1.context.issue.number)
             });
         });
         listOfPRComments.map(comment => {
@@ -937,6 +987,7 @@ const github_1 = __nccwpck_require__(5438);
 const persistence_1 = __nccwpck_require__(5802);
 const pullRerunRunner_1 = __nccwpck_require__(4766);
 const core = __importStar(__nccwpck_require__(2186));
+const input = __importStar(__nccwpck_require__(3611));
 function setupClaCheck() {
     return __awaiter(this, void 0, void 0, function* () {
         let committerMap = getInitialCommittersMap();
@@ -957,7 +1008,7 @@ function setupClaCheck() {
                 return (0, pullRerunRunner_1.reRunLastWorkFlowIfRequired)();
             }
             else {
-                core.setFailed(`Committers of Pull Request number ${github_1.context.issue.number} have to sign the CLA 📝`);
+                core.setFailed(`Committers of Pull Request number ${input.getPrNumber(github_1.context.issue.number)} have to sign the CLA 📝`);
             }
         }
         catch (err) {
@@ -1001,7 +1052,7 @@ function createClaFileAndPRComment(committers, committerMap) {
         const initialContentBinary = Buffer.from(initialContentString).toString('base64');
         yield (0, persistence_1.createFile)(initialContentBinary).catch(error => core.setFailed(`Error occurred when creating the signed contributors file: ${error.message || error}. Make sure the branch where signatures are stored is NOT protected.`));
         yield (0, pullRequestComment_1.default)(committerMap, committers);
-        throw new Error(`Committers of pull request ${github_1.context.issue.number} have to sign the CLA`);
+        throw new Error(`Committers of pull request ${input.getPrNumber(github_1.context.issue.number)} have to sign the CLA`);
     });
 }
 function prepareCommiterMap(committers, claFileContent) {
@@ -1053,7 +1104,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.lockPullRequestAfterMerge = exports.getCustomPrSignComment = exports.getUseDcoFlag = exports.getCustomAllSignedPrComment = exports.getCustomNotSignedPrComment = exports.getCreateFileCommitMessage = exports.getSignedCommitMessage = exports.getEmptyCommitFlag = exports.getAllowListItem = exports.getBranch = exports.getPathToDocument = exports.getPathToSignatures = exports.getRemoteOrgName = exports.getRemoteRepoName = void 0;
+exports.getPrNumber = exports.lockPullRequestAfterMerge = exports.getCustomPrSignComment = exports.getUseDcoFlag = exports.getCustomAllSignedPrComment = exports.getCustomNotSignedPrComment = exports.getCreateFileCommitMessage = exports.getSignedCommitMessage = exports.getEmptyCommitFlag = exports.getAllowListItem = exports.getBranch = exports.getPathToDocument = exports.getPathToSignatures = exports.getRemoteOrgName = exports.getRemoteRepoName = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const getRemoteRepoName = () => {
     return core.getInput('remote-repository-name', { required: false });
@@ -1087,6 +1138,10 @@ const getCustomPrSignComment = () => core.getInput('custom-pr-sign-comment', { r
 exports.getCustomPrSignComment = getCustomPrSignComment;
 const lockPullRequestAfterMerge = () => core.getInput('lock-pullrequest-aftermerge', { required: false });
 exports.lockPullRequestAfterMerge = lockPullRequestAfterMerge;
+const getPrNumber = (prNumberFromContext) => prNumberFromContext ?
+    prNumberFromContext :
+    Number(core.getInput('pr-number', { required: false }));
+exports.getPrNumber = getPrNumber;
 
 
 /***/ }),

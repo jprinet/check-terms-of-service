@@ -2,6 +2,7 @@ import { context } from '@actions/github'
 import { octokit } from './octokit'
 
 import * as core from '@actions/core'
+import * as input from './shared/getInputs'
 
 // Note: why this  re-run of the last failed CLA workflow status check is explained this issue https://github.com/cla-assistant/github-action/issues/39
 export async function reRunLastWorkFlowIfRequired() {
@@ -31,7 +32,7 @@ async function getBranchOfPullRequest(): Promise<string> {
   const pullRequest = await octokit.pulls.get({
     owner: context.repo.owner,
     repo: context.repo.repo,
-    pull_number: context.issue.number
+    pull_number: input.getPrNumber(context.issue.number)
   })
 
   return pullRequest.data.head.ref

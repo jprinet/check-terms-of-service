@@ -2,7 +2,7 @@ import { octokit } from './octokit'
 import { context } from '@actions/github'
 import { CommittersDetails } from './interfaces'
 
-
+import * as input from './shared/getInputs'
 
 export default async function getCommitters(): Promise<CommittersDetails[]> {
     try {
@@ -48,7 +48,7 @@ export default async function getCommitters(): Promise<CommittersDetails[]> {
     }`.replace(/ /g, ''), {
             owner: context.repo.owner,
             name: context.repo.repo,
-            number: context.issue.number,
+            number: input.getPrNumber(context.issue.number),
             cursor: ''
         })
         response.repository.pullRequest.commits.edges.forEach(edge => {
@@ -56,7 +56,7 @@ export default async function getCommitters(): Promise<CommittersDetails[]> {
             let user = {
                 name: committer.login || committer.name,
                 id: committer.databaseId || '',
-                pullRequestNo: context.issue.number
+                pullRequestNo: input.getPrNumber(context.issue.number)
             }
             if (committers.length === 0 || committers.map((c) => {
                 return c.name

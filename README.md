@@ -61,6 +61,7 @@ jobs:
           #custom-allsigned-prcomment: 'pull request comment when all contributors has signed, defaults to **CLA Assistant Lite bot** All Contributors have signed the CLA.'
           #lock-pullrequest-aftermerge: false - if you don't want this bot to automatically lock the pull request after merging (default - true)
           #use-dco-flag: true - If you are using DCO instead of CLA
+          #pr-number: pull request number - Required only if the job was not triggered with a pull_request event
 
 ```
 
@@ -124,20 +125,21 @@ This PAT should have repo scope and is only required if you have configured to s
 
 ### Inputs Description:
 
-| Name                  | Requirement | Description | Example |
-| --------------------- | ----------- | ----------- | ------- |
-| `path-to-document`     | _required_ |  provide full URL `https://<clafile>` to the document which shall be signed by the contributor(s)  It can be any file e.g. inside the repository or it can be a gist. | https://github.com/cla-assistant/github-action/blob/master/SAPCLA.md |
-| `path-to-signatures`       | _optional_ |  Path to the JSON file where  all the signatures of the contributors will be stored inside the repository. | signatures/version1/cla.json |
-| `branch`   | _optional_ |  Branch in which all the signatures of the contributors will be stored and Default branch is `master`.  | master |
-| `allowlist`   | _optional_ | You can specify users and bots to be [added in allowlist](https://github.com/cla-assistant/github-action#5-users-and-bots-in-allowlist).  | user1,user2,bot* |
-| `remote-repository-name`   | _optional_ | provide the remote repository name where all the signatures should be stored . | remote repository name |
-| `remote-organization-name`   | _optional_ | provide the remote organization name where all the signatures should be stored. | remote organization name |
-| `create-file-commit-message`   | _optional_ |Commit message when a new CLA file is created. | Creating file for storing CLA Signatures. |
-| `signed-commit-message`   | _optional_ | Commit message when a new contributor signs the CLA in a Pull Request. |  $contributorName has signed the CLA in $pullRequestNo |
-| `custom-notsigned-prcomment`   | _optional_ | Introductory Pull Request comment to ask new contributors to sign. | Thank you for your contribution and please kindly read and sign our $pathToCLADocument |
-| `custom-pr-sign-comment`   | _optional_ | The signature to be committed in order to sign the CLA. | I have read the Developer Terms Document and I hereby accept the Terms |
-| `custom-allsigned-prcomment`   | _optional_ | pull request comment when everyone has signed | All Contributors have signed the CLA. |
-| `lock-pullrequest-aftermerge`   | _optional_ | Boolean input for locking the pull request after merging. Default is set to `true`.  It is highly recommended to lock the Pull Request after merging so that the Contributors won't be able to revoke their signature comments after merge | false |
+| Name                          | Requirement  | Description                                                                                                                                                                                                                                | Example                                                                                |
+|-------------------------------|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
+| `path-to-document`            | _required_   | provide full URL `https://<clafile>` to the document which shall be signed by the contributor(s)  It can be any file e.g. inside the repository or it can be a gist.                                                                       | https://github.com/cla-assistant/github-action/blob/master/SAPCLA.md                   |
+| `path-to-signatures`          | _optional_   | Path to the JSON file where  all the signatures of the contributors will be stored inside the repository.                                                                                                                                  | signatures/version1/cla.json                                                           |
+| `branch`                      | _optional_   | Branch in which all the signatures of the contributors will be stored and Default branch is `master`.                                                                                                                                      | master                                                                                 |
+| `allowlist`                   | _optional_   | You can specify users and bots to be [added in allowlist](https://github.com/cla-assistant/github-action#5-users-and-bots-in-allowlist).                                                                                                   | user1,user2,bot*                                                                       |
+| `remote-repository-name`      | _optional_   | provide the remote repository name where all the signatures should be stored .                                                                                                                                                             | remote repository name                                                                 |
+| `remote-organization-name`    | _optional_   | provide the remote organization name where all the signatures should be stored.                                                                                                                                                            | remote organization name                                                               |
+| `create-file-commit-message`  | _optional_   | Commit message when a new CLA file is created.                                                                                                                                                                                             | Creating file for storing CLA Signatures.                                              |
+| `signed-commit-message`       | _optional_   | Commit message when a new contributor signs the CLA in a Pull Request.                                                                                                                                                                     | $contributorName has signed the CLA in $pullRequestNo                                  |
+| `custom-notsigned-prcomment`  | _optional_   | Introductory Pull Request comment to ask new contributors to sign.                                                                                                                                                                         | Thank you for your contribution and please kindly read and sign our $pathToCLADocument |
+| `custom-pr-sign-comment`      | _optional_   | The signature to be committed in order to sign the CLA.                                                                                                                                                                                    | I have read the Developer Terms Document and I hereby accept the Terms                 |
+| `custom-allsigned-prcomment`  | _optional_   | pull request comment when everyone has signed                                                                                                                                                                                              | All Contributors have signed the CLA.                                                  |
+| `lock-pullrequest-aftermerge` | _optional_   | Boolean input for locking the pull request after merging. Default is set to `true`.  It is highly recommended to lock the Pull Request after merging so that the Contributors won't be able to revoke their signature comments after merge | false                                                                                  |
+| `pr-number`                   | _optional_   | pull request number (required when the workflow event is not pull_request / pull_request_target).                                                                                                                                          | 42                                                                                     |
 
 ## Contributors
 
